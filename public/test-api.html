@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API 测试页面</title>
+</head>
+<body>
+    <h1>AI 助手 API 测试</h1>
+    
+    <div>
+        <h3>健康检查</h3>
+        <button onclick="testHealth()">测试健康检查</button>
+        <div id="health-result"></div>
+    </div>
+    
+    <div>
+        <h3>聊天API测试</h3>
+        <input type="text" id="message" placeholder="输入消息" value="你好">
+        <button onclick="testChat()">发送消息</button>
+        <div id="chat-result"></div>
+    </div>
+
+    <script>
+        async function testHealth() {
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                document.getElementById('health-result').innerHTML = 
+                    `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('health-result').innerHTML = 
+                    `<p style="color: red;">错误: ${error.message}</p>`;
+            }
+        }
+
+        async function testChat() {
+            try {
+                const message = document.getElementById('message').value;
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        messages: [{ role: 'user', content: message }],
+                        settings: {
+                            model: 'gpt-3.5-turbo',
+                            temperature: 0.7,
+                            maxTokens: 100
+                        }
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('chat-result').innerHTML = 
+                        `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                } else {
+                    const errorText = await response.text();
+                    document.getElementById('chat-result').innerHTML = 
+                        `<p style="color: red;">错误 ${response.status}: ${errorText}</p>`;
+                }
+            } catch (error) {
+                document.getElementById('chat-result').innerHTML = 
+                    `<p style="color: red;">错误: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
