@@ -676,7 +676,7 @@ app.post('/api/chat', async (req, res) => {
     
     // 🔧 重要：在调用 AI 之前清理消息格式
     const cleanMessages = messages
-      .filter(msg => msg.role === 'user' || msg.role === 'assistant')
+      .filter(msg => msg.role === 'user' || msg.role === 'assistant' || msg.role === 'system')
       .map(msg => ({
         role: msg.role,
         content: msg.content
@@ -930,7 +930,7 @@ app.post('/api/chat', async (req, res) => {
         
         // 清理消息历史，只保留用户和助手的对话，移除工具调用相关字段
         const cleanMessages = messages
-          .filter(msg => msg.role === 'user' || msg.role === 'assistant')
+          .filter(msg => msg.role === 'user' || msg.role === 'assistant' || msg.role === 'system')
           .map(msg => ({
             role: msg.role,
             content: msg.role === 'assistant' ? msg.content : msg.content

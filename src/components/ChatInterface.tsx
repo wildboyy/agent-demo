@@ -1,12 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useChat } from '../contexts/ChatContext'
 import { useMCP } from '../contexts/MCPContext'
+import { useSystemPrompt } from '../contexts/SystemPromptContext'
 import { AIService } from '../services/aiService'
 import { AIToolCall, AIServiceResponse } from '../services/aiService'
 
 const ChatInterface: React.FC = () => {
   const { state, dispatch } = useChat()
   const { state: mcpState } = useMCP()
+  const { getActivePrompt, state: systemPromptState } = useSystemPrompt()
   const [userMessage, setUserMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isExecutingTool, setIsExecutingTool] = useState(false)
@@ -15,6 +17,15 @@ const ChatInterface: React.FC = () => {
   
   // 创建 AI 服务实例
   const aiService = new AIService()
+
+  // 调试：显示系统提示词上下文状态
+  useEffect(() => {
+    console.log('🔍 ChatInterface 组件初始化 - 系统提示词状态:', {
+      systemPromptState,
+      activePrompt: getActivePrompt(),
+      hasActivePrompt: !!getActivePrompt()
+    })
+  }, [systemPromptState, getActivePrompt])
 
   // 自动滚动到底部
   useEffect(() => {
@@ -70,14 +81,44 @@ const ChatInterface: React.FC = () => {
       // 获取可用工具
       const availableTools = getAvailableTools()
       
+      // 获取当前激活的系统提示词
+      const activePrompt = getActivePrompt()
+      
+      console.log('🔍 系统提示词状态:', {
+        activePrompt,
+        hasActivePrompt: !!activePrompt,
+        promptContent: activePrompt?.content
+      })
+      
+      // 构建消息数组，如果存在系统提示词则添加到开头
+      let messagesToSend = state.messages.concat({
+        id: userMsgId,
+        role: 'user',
+        content: userMessageText,
+        timestamp: new Date()
+      })
+      
+      // 如果有激活的系统提示词，添加到消息数组开头
+      if (activePrompt) {
+        console.log('📝 添加系统提示词到消息:', activePrompt.content)
+        messagesToSend = [
+          {
+            id: `system_${Date.now()}`,
+            role: 'system',
+            content: activePrompt.content,
+            timestamp: new Date()
+          },
+          ...messagesToSend
+        ]
+      } else {
+        console.log('⚠️ 没有激活的系统提示词')
+      }
+      
+      console.log('📤 发送给 AI 的消息数组:', messagesToSend)
+      
       // 调用 AI 服务
       const aiResponse: AIServiceResponse = await aiService.chat(
-        state.messages.concat({
-          id: userMsgId,
-          role: 'user',
-          content: userMessageText,
-          timestamp: new Date()
-        }),
+        messagesToSend,
         state.settings,
         availableTools.length > 0 ? availableTools : undefined
       )

@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
 import { SystemPrompt } from '../types'
+import { useSystemPrompt } from '../contexts/SystemPromptContext'
 
 const SystemPromptManager: React.FC = () => {
+  const { state, addPrompt, updatePrompt, deletePrompt, activatePrompt } = useSystemPrompt()
   const [showAddForm, setShowAddForm] = useState(false)
   const [editingPrompt, setEditingPrompt] = useState<SystemPrompt | null>(null)
   const [newPrompt, setNewPrompt] = useState({
@@ -9,36 +11,20 @@ const SystemPromptManager: React.FC = () => {
     content: ''
   })
 
-  const [prompts, setPrompts] = useState<SystemPrompt[]>([
-    {
-      id: '1',
-      name: '默认助手',
-      content: '你是一个有用的AI助手，可以帮助用户解决各种问题。',
-      isActive: true
-    },
-    {
-      id: '2',
-      name: '编程专家',
-      content: '你是一个专业的编程助手，擅长各种编程语言和技术栈。请提供详细的技术解答和代码示例。',
-      isActive: false
-    },
-    {
-      id: '3',
-      name: '创意写作',
-      content: '你是一个创意写作助手，可以帮助用户进行创意写作、故事创作和内容策划。',
-      isActive: false
-    }
-  ])
+  // 调试：显示当前状态
+  console.log('🔍 SystemPromptManager 状态:', {
+    prompts: state.prompts,
+    activePrompt: state.activePrompt,
+    hasActivePrompt: !!state.activePrompt
+  })
 
   const handleAddPrompt = () => {
     if (newPrompt.name.trim() && newPrompt.content.trim()) {
-      const prompt: SystemPrompt = {
-        id: Date.now().toString(),
+      addPrompt({
         name: newPrompt.name.trim(),
         content: newPrompt.content.trim(),
         isActive: false
-      }
-      setPrompts(prev => [...prev, prompt])
+      })
       setNewPrompt({ name: '', content: '' })
       setShowAddForm(false)
     }
@@ -52,11 +38,11 @@ const SystemPromptManager: React.FC = () => {
 
   const handleUpdatePrompt = () => {
     if (editingPrompt && newPrompt.name.trim() && newPrompt.content.trim()) {
-      setPrompts(prev => prev.map(p => 
-        p.id === editingPrompt.id 
-          ? { ...p, name: newPrompt.name.trim(), content: newPrompt.content.trim() }
-          : p
-      ))
+      updatePrompt({
+        ...editingPrompt,
+        name: newPrompt.name.trim(),
+        content: newPrompt.content.trim()
+      })
       setEditingPrompt(null)
       setNewPrompt({ name: '', content: '' })
       setShowAddForm(false)
@@ -64,17 +50,12 @@ const SystemPromptManager: React.FC = () => {
   }
 
   const handleDeletePrompt = (id: string) => {
-    setPrompts(prev => prev.filter(p => p.id !== id))
+    deletePrompt(id)
   }
 
   const handleActivatePrompt = (id: string) => {
-    setPrompts(prev => prev.map(p => ({
-      ...p,
-      isActive: p.id === id
-    })))
-    
-    // 移除对 systemPrompt 的更新
-    console.log('提示词已激活，但不再更新系统设置')
+    activatePrompt(id)
+    console.log('提示词已激活')
   }
 
   const handleCancel = () => {
@@ -134,7 +115,7 @@ const SystemPromptManager: React.FC = () => {
 
       {/* 提示词列表 */}
       <div className="space-y-3">
-        {prompts.map((prompt) => (
+        {state.prompts.map((prompt) => (
           <div key={prompt.id} className="border border-gray-200 rounded-lg p-4">
             <div className="flex items-start justify-between mb-2">
               <div className="flex-1">
@@ -179,13 +160,7 @@ const SystemPromptManager: React.FC = () => {
         ))}
       </div>
 
-      {/* 当前使用的提示词 */}
-      <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-        <h4 className="font-medium text-blue-900 mb-2">当前系统提示词</h4>
-        <p className="text-sm text-blue-800">
-          系统提示词功能已移除，当前使用默认设置
-        </p>
-      </div>
+      
     </div>
   )
 }

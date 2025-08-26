@@ -252,27 +252,7 @@ const MCPManager: React.FC = () => {
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-medium text-gray-900">MCP工具管理</h3>
         <div className="flex space-x-2">
-          <button
-            onClick={handleBackupConnections}
-            className="btn-secondary text-sm px-3 py-1"
-            title="备份所有连接配置"
-          >
-            备份
-          </button>
-          <button
-            onClick={handleReloadConnections}
-            className="btn-secondary text-sm px-3 py-1"
-            title="手动重新加载连接配置"
-          >
-            重新加载
-          </button>
-          <button
-            onClick={resetMCPTools}
-            className="btn-secondary text-sm px-3 py-1"
-            title="重置 MCP 工具"
-          >
-            重置
-          </button>
+          
           <button
             onClick={() => setShowAddForm(!showAddForm)}
             className="btn-primary text-sm px-3 py-1"

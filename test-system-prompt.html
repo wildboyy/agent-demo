@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统提示词测试</title>
+</head>
+<body>
+    <h1>系统提示词功能测试</h1>
+    <p>请在前端页面中测试系统提示词功能：</p>
+    <ol>
+        <li>访问 <a href="http://localhost:3002" target="_blank">http://localhost:3002</a></li>
+        <li>在侧边栏点击"提示词"标签</li>
+        <li>确认"默认助手"提示词处于激活状态（显示"当前使用"标签）</li>
+        <li>在聊天框中发送一条消息</li>
+        <li>查看浏览器控制台的调试日志</li>
+    </ol>
+    
+    <h2>预期结果</h2>
+    <p>控制台应该显示：</p>
+    <ul>
+        <li>🔍 系统提示词状态: { activePrompt: {...}, hasActivePrompt: true, promptContent: "你是一个有用的AI助手..." }</li>
+        <li>📝 添加系统提示词到消息: 你是一个有用的AI助手，可以帮助用户解决各种问题。</li>
+        <li>📤 发送给 AI 的消息数组: [系统消息, 用户消息]</li>
+    </ul>
+    
+    <h2>如果问题仍然存在</h2>
+    <p>可能的原因：</p>
+    <ul>
+        <li>SystemPromptContext 没有正确初始化</li>
+        <li>getActivePrompt 函数返回 null</li>
+        <li>前端组件没有正确使用上下文</li>
+    </ul>
+</body>
+</html>
